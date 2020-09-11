@@ -18,10 +18,10 @@ class Node():
 
 	def print_info(self, with_children_vals = False):
 		if with_children_vals:
-			print("Value: " + str(self.value) + "\nChildren Keys: " + str(self.children.keys()) + "\nChildren Vals: " + str(self.children.values()) +
+			print("Value: " + str(self.value) + "\nChildren Keys: " + str(list(self.children.keys())) + "\nChildren Vals: " + str(self.children.values()) +
 			"\nDistance from root: " + str(self.distance_from_root) + "\nPaths Available: " + str(dict(self.paths)) + "\n")
 
-		print("Value: " + str(self.value) + "\nChildren Keys: " + str(self.children.keys()) +"\nDistance from root: " 
+		print("Value: " + str(self.value) + "\nChildren Keys: " + str(list(self.children.keys())) +"\nDistance from root: " 
 			+ str(self.distance_from_root) + "\nPaths Available: " + str(dict(self.paths)) + "\n")
 
 def get_words(file):
@@ -121,32 +121,45 @@ def bsf(root, start):
 				visited.append(current.children[key])
 
 def play(new_letter, root):
-	start = traverse_tree_to_start(new_letter, root)
-	# start.print_info()
+	start = traverse_tree_to_letter(new_letter, root)
+	print("Start Info")
+	start.print_info()
+	# end = bsf(root, start)
+	
 	if len(start.children) is 1:
 		end = start.children[list(start.children.keys())[0]]
+		print("1 Child, end node: " + str(end))
 	else:
 		end = bsf(root, start)
-	# end.print_info()
+		print("more than 1 child, end node: " + str(end))
+
+	if not end:
+		end = start.children[list(start.children.keys())[0]]
+
+	print("End Info")
+	end.print_info()
 	current = end.parent_node
-	path = [current.value]
+	path = []#current.value]
 	while current is not start:
 		current = current.parent_node
-		path.append(current.value)
+		path.insert(0, current.value)
 	
-	# print(path)
+	print("Paths available to the current choice: " + str(dict(current.paths)))
+	print("Path from start to end: " + str(path))
 
+	# next_letter = end.value
 	if len(start.children) is 1:
 		next_letter = end.value
 	else:
-		next_letter = path[-2]
+		next_letter = path[0]
 	current = start.children[next_letter]
 
 	return next_letter, current
 
-def traverse_tree_to_start(letter, root):
+def traverse_tree_to_letter(letter, root):
 	parent = root
-	parent = parent.children[letter]
+	while parent.value != letter:
+		parent = parent.children[letter]
 	return parent
 
 def get_letter(valid_letters):
@@ -156,17 +169,14 @@ def get_letter(valid_letters):
 		letter_in = input("Enter a letter: ")
 	return letter_in
 
-def if_over(word):
-	if word in scrabble_words:
-		return True
-	return False
-
 def play_ghost(legal_words, root):
 	letter_choices = [i for i in alphabet]
 	current_word = get_letter(letter_choices)
 	print("\nHuman's turn: \n" + str(current_word))
+
 	human = False
 	current_node = root
+
 	while len(current_word) < min_word_length or current_word not in legal_words:
 		letter_choices = list(current_node.children.keys())
 		if human:
@@ -178,8 +188,7 @@ def play_ghost(legal_words, root):
 		current_word = current_word + added_letter
 		human = not human
 		print(current_word)
-		# print()
-		# print(current_word)
+
 	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
 
 def print_branch(root, letters):
@@ -209,8 +218,3 @@ play_ghost(legal_words_list, tree)
 print()
 
 # print_branch(tree, "zeal")
-
-
-# tree = make_word_tree(word_list)
-# print(tree.get_children())
-# play_ghost(word_list)
