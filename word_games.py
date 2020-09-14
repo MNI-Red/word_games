@@ -45,18 +45,18 @@ def make_tree(file, root):
 				# print(to_add)
 	return root
 
-def make_tree_from_list(word_list, root):
-	word = ""
-	first = True
-	for x in word_list:
-		if len(x) >= min_word_length:
-			# print(x)
-			if first:
-				add_word(word, root, checks = False)
-				first = False
-			add_word(x, root)
-			# print(x)
-	return root
+# def make_tree(word_list, root):
+# 	word = ""
+# 	first = True
+# 	for x in word_list:
+# 		if len(x) >= min_word_length:
+# 			# print(x)
+# 			if first:
+# 				add_word(word, root, checks = False)
+# 				first = False
+# 			add_word(x, root)
+# 			# print(x)
+# 	return root
 
 # def add_first(word, root):
 	# parent = root
@@ -179,12 +179,6 @@ def traverse_tree_to_start(letter, root):
 	parent = parent.children[letter]
 	return parent
 
-def get_starting_order():
-	answer = ""
-	while answer not "y" and answer not "n":
-		answer = input("Would you like the human to go first: [y/n]\n")
-	return True if answer == "y" else False
-
 def get_letter(valid_letters):
 	print("\nValid Letters: " + str(valid_letters))
 	letter_in = input("Enter a letter: ")
@@ -197,11 +191,11 @@ def if_over(word):
 		return True
 	return False
 
-def play_ghost(legal_words, root, human = False):
-	# letter_choices = [i for i in alphabet]
-	# current_word = get_letter(letter_choices)
-	# print("\nHuman's turn: \n" + str(current_word))
-	# human = False
+def play_ghost(legal_words, root):
+	letter_choices = [i for i in alphabet]
+	current_word = get_letter(letter_choices)
+	print("\nHuman's turn: \n" + str(current_word))
+	human = False
 	current_node = root
 	while len(current_word) < min_word_length or current_word not in legal_words:
 		letter_choices = list(current_node.children.keys())
@@ -243,9 +237,11 @@ legal_words_list = get_words("scrabble.txt")
 root = Node(None, " ", 0)
 tree = make_tree("scrabble.txt", root)
 
+
+
 # print(legal_words_list)
 
-play_ghost(legal_words_list, tree, get_starting_order())
+play_ghost(legal_words_list, tree)
 # tree.print_info()
 print()
 

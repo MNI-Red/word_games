@@ -1,6 +1,7 @@
 import string
 from collections import defaultdict
 min_word_length = 4
+root_value = ""
 alphabet = string.ascii_lowercase
 
 class Node():
@@ -18,10 +19,10 @@ class Node():
 
 	def print_info(self, with_children_vals = False):
 		if with_children_vals:
-			print("Value: " + str(self.value) + "\nChildren Keys: " + str(list(self.children.keys())) + "\nChildren Vals: " + str(self.children.values()) +
+			print("Value: " + str(self.value) + "\nChildren Keys: " + str(self.children.keys()) + "\nChildren Vals: " + str(self.children.values()) +
 			"\nDistance from root: " + str(self.distance_from_root) + "\nPaths Available: " + str(dict(self.paths)) + "\n")
 
-		print("Value: " + str(self.value) + "\nChildren Keys: " + str(list(self.children.keys())) +"\nDistance from root: " 
+		print("Value: " + str(self.value) + "\nChildren Keys: " + str(self.children.keys()) +"\nDistance from root: " 
 			+ str(self.distance_from_root) + "\nPaths Available: " + str(dict(self.paths)) + "\n")
 
 def get_words(file):
@@ -43,6 +44,19 @@ def make_tree(file, root):
 				# print(to_add)
 				add_word(to_add, root)
 				# print(to_add)
+	return root
+
+def make_tree_from_list(word_list, root):
+	word = ""
+	first = True
+	for x in word_list:
+		if len(x) >= min_word_length:
+			# print(x)
+			if first:
+				add_word(word, root, checks = False)
+				first = False
+			add_word(x, root)
+			# print(x)
 	return root
 
 # def add_first(word, root):
@@ -103,7 +117,6 @@ def add_leaf(parent, value):
 	parent.add_children(leaf)
 	return leaf
 
-
 def bsf(root, start):
 	queue = []
 	queue.append(start)
@@ -120,47 +133,59 @@ def bsf(root, start):
 				queue.append(current.children[key])
 				visited.append(current.children[key])
 
-def play(new_letter, root):
-	start = traverse_tree_to_letter(new_letter, root)
-	print("Start Info")
+def count_even_paths(node):
+	num_even_paths = 0
+	for i in node.paths:
+		if i%2==0:
+			num_even_paths += node.paths[i]
+	return num_even_paths
+
+def pick_next_letter(node):
+	child_address = [node.children[i] for i in node.children]
+	even_paths_by_node = {}
+	for i in node.children:
+		even_paths_by_node[i] = count_even_paths(node.children[i])
+	even_paths_by_node = sorted(even_paths_by_node, key=even_paths_by_node.get, reverse=True)
+	return node.children[even_paths_by_node[0]]
+
+def bot_move(new_letter, root):
+	start = traverse_tree_to_start(new_letter, root)
 	start.print_info()
-	# end = bsf(root, start)
-	
-	if len(start.children) is 1:
-		end = start.children[list(start.children.keys())[0]]
-		print("1 Child, end node: " + str(end))
+	if len(start.children) == 1:
+		current = start.children[list(start.children.keys())[0]]
+		# end = start.children[list(start.children.keys())[0]]
 	else:
-		end = bsf(root, start)
-		print("more than 1 child, end node: " + str(end))
-
-	if not end:
-		end = start.children[list(start.children.keys())[0]]
-
-	print("End Info")
-	end.print_info()
-	current = end.parent_node
-	path = []#current.value]
-	while current is not start:
-		current = current.parent_node
-		path.insert(0, current.value)
+		current = pick_next_letter(start)
+		# end = bsf(root, start)
+		# if not end:
+		# 	end = start.children[list(start.children.keys())[0]]
+	# end.print_info()
+	# current = end
+	# word_by_letters = [current.value]
+	# while current != start:
+	# 	current = current.parent_node
+	# 	word_by_letters.insert(0, current.value)
 	
-	print("Paths available to the current choice: " + str(dict(current.paths)))
-	print("Path from start to end: " + str(path))
+	# print(word_by_letters)
+	# next_letter = word_by_letters[1]
+	# current = start.children[next_letter]
+	# if len(start.children) is 1:
+	# 	next_letter = end.value
+	# else:
+	# 	next_letter = word_by_letters[-2]
+	return current.value, current
 
-	# next_letter = end.value
-	if len(start.children) is 1:
-		next_letter = end.value
-	else:
-		next_letter = path[0]
-	current = start.children[next_letter]
-
-	return next_letter, current
-
-def traverse_tree_to_letter(letter, root):
+def traverse_tree_to_start(letter, root):
 	parent = root
-	while parent.value != letter:
-		parent = parent.children[letter]
+	if parent.value != root_value:
+		return parent.children[letter]
 	return parent
+
+def get_starting_order():
+	answer = ""
+	while answer != "y" and answer != "n":
+		answer = input("Would you like the human to go first: [y/n]\n")
+	return True if answer == "y" else False
 
 def get_letter(valid_letters):
 	print("\nValid Letters: " + str(valid_letters))
@@ -169,15 +194,19 @@ def get_letter(valid_letters):
 		letter_in = input("Enter a letter: ")
 	return letter_in
 
+def if_over(word):
+	if word in scrabble_words:
+		return True
+	return False
+
 def play_ghost(legal_words, root):
 	letter_choices = [i for i in alphabet]
 	current_word = get_letter(letter_choices)
 	print("\nHuman's turn: \n" + str(current_word))
-
 	human = False
 	current_node = root
-
 	while len(current_word) < min_word_length or current_word not in legal_words:
+		print(curren)
 		letter_choices = list(current_node.children.keys())
 		if human:
 			added_letter = get_letter(letter_choices)
@@ -188,7 +217,37 @@ def play_ghost(legal_words, root):
 		current_word = current_word + added_letter
 		human = not human
 		print(current_word)
+		# print()
+		# print(current_word)
+	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
 
+def new_play_ghost(legal_words, root, human = False):
+	current_node = root
+	# current_word = ""
+	# if human:
+	letter_choices = [i for i in alphabet]
+	current_word = get_letter(letter_choices)
+	added_letter = current_word
+	print("\nHuman's turn: \n")
+	# else:
+	# 	added_letter, current_node = bot_move(current_word, current_node)
+	# 	print("\nBot's turn: ")
+	# human = not human
+	print(current_word)
+	
+	while len(current_word) < min_word_length or current_word not in legal_words:
+		letter_choices = list(current_node.children.keys())
+		if human:
+			added_letter = get_letter(letter_choices)
+			print("\nHuman's turn: ")
+		else:
+			added_letter, current_node = bot_move(added_letter, current_node)
+			print("\nBot's turn: ")
+		current_word = current_word + added_letter
+		human = not human
+		print(current_word)
+		# print()
+		# print(current_word)
 	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
 
 def print_branch(root, letters):
@@ -198,6 +257,16 @@ def print_branch(root, letters):
 		letters = letters [1:]
 	root.print_info()
 
+def print_tree(root, path = []):
+	if root is None:
+		return
+	path.append(root.value)
+	if root.children is None: 
+		print(path)
+
+	for i in root.children:
+		print_tree(root.children[i], path)
+
 def sort_scrabble(scrabble, short):
 	with open(scrabble, "r") as scr:
 		with open(short, "w") as sho:
@@ -205,16 +274,28 @@ def sort_scrabble(scrabble, short):
 				if len(i[:-1].lower()) >= min_word_length:
 					sho.write(i.lower())
 
+def play(current_game_state, word_list):
+	legal_words_list = get_words("scrabble.txt")
+	root = Node(None, " ", 0)
+	tree = make_tree("scrabble.txt", root)
+
+
 # sort_scrabble("scrabble.txt", "new_scrabble.txt")
 legal_words_list = get_words("scrabble.txt")
-root = Node(None, " ", 0)
+root = Node(None, root_value, 0)
 tree = make_tree("scrabble.txt", root)
 
-
+# print_tree(tree)
 # print(legal_words_list)
 
+# play_ghost(legal_words_list, tree, get_starting_order())
 play_ghost(legal_words_list, tree)
 # tree.print_info()
 print()
 
 # print_branch(tree, "zeal")
+
+
+# tree = make_word_tree(word_list)
+# print(tree.get_children())
+# play_ghost(word_list)
