@@ -144,8 +144,10 @@ def pick_next_letter(node):
 	even_paths_by_node = {}
 	for i in node.children:
 		even_paths_by_node[i] = count_even_paths(node.children[i])
-	even_paths_by_node = sorted(even_paths_by_node, key=even_paths_by_node.get, reverse=True)
-	return node.children[even_paths_by_node[0]]
+	# print(even_paths_by_node)
+	even_paths_by_node = sorted(even_paths_by_node.items(), key=lambda x: x[1], reverse=True)
+	print(even_paths_by_node)
+	return node.children[even_paths_by_node[0][0]]
 
 def bot_move(new_letter, root):
 	start = traverse_tree_to_start(new_letter, root)
@@ -236,8 +238,6 @@ def play(current_game_state, word_list):
 legal_words_list = get_words("scrabble.txt")
 root = Node(None, " ", 0)
 tree = make_tree("scrabble.txt", root)
-
-
 
 # print(legal_words_list)
 
