@@ -157,6 +157,34 @@ def pick_next_letter(node):
 	# print(even_paths_by_node)
 	return node.children[even_paths_by_node[0][0]]
 
+def bsf_bot_move(new_string, root):
+	start = traverse_tree_to_start(new_string, root)
+	# start.print_info()
+	# current = pick_next_letter(start)
+	
+	if len(start.children) == 1:
+		current = start.children[list(start.children.keys())[0]]
+		# end = start.children[list(start.children.keys())[0]]
+	else:
+		current = bsf(root, start)
+		if not current:
+			current = start.children[list(start.children.keys())[0]]
+	# end.print_info()
+	# current = end
+	word_by_letters = [current.value]
+	while current != start:
+		current = current.parent_node
+		word_by_letters.insert(0, current.value)
+	
+	print(word_by_letters)
+	next_letter = word_by_letters[1]
+	current = start.children[next_letter]
+	# if len(start.children) is 1:
+	# 	next_letter = end.value
+	# else:
+	# 	next_letter = word_by_letters[-2]
+	return next_letter
+
 def bot_move(new_string, root):
 	start = traverse_tree_to_start(new_string, root)
 	# start.print_info()
@@ -194,10 +222,22 @@ def traverse_tree_to_start(word, root):
 		current = current.children[i]
 	return current
 
-def get_starting_order():
+def if_human_plays():
 	answer = ""
 	while answer != "y" and answer != "n":
-		answer = input("Would you like the human to go first: [y/n]\n")
+		answer = input("Would you like to play the game youself: [y/n]\n")
+	return True if answer == "y" else False
+
+def choose_bot():
+	answer = ""
+	while answer != "c" and answer != "r":
+		answer = input("Would you like Casper or Raven to go first: [c/r]\n")
+	return True if answer == "c" else False
+
+def get_starting_order(human = True):
+	answer = ""
+	while answer != "y" and answer != "n":
+		answer = input("Would you like to go first: [y/n]\n")
 	return True if answer == "y" else False
 
 def get_letter(valid_letters):
@@ -233,6 +273,27 @@ def if_over(word):
 	# 		# print()
 	# 		# print(current_word)
 	# 	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
+
+def bot_v_bot(legal_words, root, casper = True):
+	current_word = ""
+	current_node = root
+	
+	while len(current_word) < min_word_length or current_word not in legal_words:
+		letter_choices = list(current_node.children)
+		if casper:
+			added_letter = bot_move(current_word, root)
+			print("\nCasper's turn: ")
+		else:
+			added_letter = bsf_bot_move(current_word, root)
+			print("\nRaven's turn: ")
+		current_word = current_word + added_letter
+		current_node = current_node.children[added_letter]
+		casper = not casper
+		print(current_word)
+		# print()
+		# print(current_word)
+	print("Final Word: " + str(current_word))
+	print("Casper Wins!!!") if casper else print("Raven Wins!!!")
 
 def play_ghost(legal_words, root, human = False):
 	current_word = ""
@@ -304,8 +365,11 @@ legal_words_list, root, tree = initialize_bot("scrabble.txt")
 # legal_words_list = get_words(word_file)
 # root = Node(None, root_value, 0)
 # tree = make_tree(word_file, root)
-
-play_ghost(legal_words_list, tree, get_starting_order())
+human_plays = if_human_plays()
+if human_plays:
+	play_ghost(legal_words_list, tree, get_starting_order())
+else:
+	bot_v_bot(legal_words_list, tree, choose_bot())
 # play_ghost(legal_words_list, tree)
 # tree.print_info()
 print()
