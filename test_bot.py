@@ -152,13 +152,14 @@ def pick_next_letter(node):
 	even_paths_by_node = {}
 	for i in node.children:
 		even_paths_by_node[i] = count_odd_paths(node.children[i]) - count_even_paths(node.children[i])
+		# even_paths_by_node[i] = count_even_paths(node.children[i]) - count_odd_paths(node.children[i])
 	even_paths_by_node = sorted(even_paths_by_node.items(), key=lambda x: x[1], reverse=True)
-	print(even_paths_by_node)
+	# print(even_paths_by_node)
 	return node.children[even_paths_by_node[0][0]]
 
 def bot_move(new_string, root):
 	start = traverse_tree_to_start(new_string, root)
-	start.print_info()
+	# start.print_info()
 	current = pick_next_letter(start)
 	
 	# if len(start.children) == 1:
@@ -211,29 +212,29 @@ def if_over(word):
 		return True
 	return False
 
-def play_ghost(legal_words, root):
-	letter_choices = [i for i in alphabet]
-	current_word = get_letter(letter_choices)
-	print("\nHuman's turn: \n" + str(current_word))
-	human = False
-	current_node = root
-	while len(current_word) < min_word_length or current_word not in legal_words:
-		print(current)
-		letter_choices = list(current_node.children.keys())
-		if human:
-			added_letter = get_letter(letter_choices)
-			print("\nHuman's turn: ")
-		else:
-			added_letter, current_node = play(current_word[-1], current_node)
-			print("\nBot's turn: ")
-		current_word = current_word + added_letter
-		human = not human
-		print(current_word)
-		# print()
-		# print(current_word)
-	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
+#def play_ghost(legal_words, root):
+	# 	letter_choices = [i for i in alphabet]
+	# 	current_word = get_letter(letter_choices)
+	# 	print("\nHuman's turn: \n" + str(current_word))
+	# 	human = False
+	# 	current_node = root
+	# 	while len(current_word) < min_word_length or current_word not in legal_words:
+	# 		print(current)
+	# 		letter_choices = list(current_node.children.keys())
+	# 		if human:
+	# 			added_letter = get_letter(letter_choices)
+	# 			print("\nHuman's turn: ")
+	# 		else:
+	# 			added_letter, current_node = play(current_word[-1], current_node)
+	# 			print("\nBot's turn: ")
+	# 		current_word = current_word + added_letter
+	# 		human = not human
+	# 		print(current_word)
+	# 		# print()
+	# 		# print(current_word)
+	# 	print("Final Word: " + str(current_word) + "\nWinner Human: " + str(human))
 
-def new_play_ghost(legal_words, root, human = False):
+def play_ghost(legal_words, root, human = False):
 	current_word = ""
 	current_node = root
 	# # if human:
@@ -286,20 +287,25 @@ def sort_scrabble(scrabble, short):
 				if len(i[:-1].lower()) >= min_word_length:
 					sho.write(i.lower())
 
+def initialize_bot(word_file):
+	# sort_scrabble("scrabble.txt", "new_scrabble.txt")
+	legal_words_list = get_words(word_file)
+	root = Node(None, root_value, 0)
+	tree = make_tree(word_file, root)
+	return legal_words_list, root, tree
+
 def play(current_game_state, word_list):
-	legal_words_list = get_words("scrabble.txt")
-	root = Node(None, " ", 0)
-	tree = make_tree("scrabble.txt", root)
+	play_ghost(legal_words_list, tree, get_starting_order()) 
 
-# sort_scrabble("scrabble.txt", "new_scrabble.txt")
-legal_words_list = get_words("scrabble.txt")
-root = Node(None, root_value, 0)
-tree = make_tree("scrabble.txt", root)
-
+legal_words_list, root, tree = initialize_bot("scrabble.txt")
 # print_tree(tree)
 # print(legal_words_list)
 
-new_play_ghost(legal_words_list, tree, get_starting_order())
+# legal_words_list = get_words(word_file)
+# root = Node(None, root_value, 0)
+# tree = make_tree(word_file, root)
+
+play_ghost(legal_words_list, tree, get_starting_order())
 # play_ghost(legal_words_list, tree)
 # tree.print_info()
 print()
