@@ -3,6 +3,6 @@ Thus this game is entirely solvable as:
   it is impartial, 
   has perfect information, 
   is non-random, 
-  has normal play,
+  has misère play,
   has no looping,
   and is finite.
